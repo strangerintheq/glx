@@ -34,28 +34,22 @@ function GLx() {
 
         function attribute(name, count) {
             var al = gl.getAttribLocation(pid, name);
-
             return {
-                bind: bind
+                bind: function (buffer) {
+                    buffer.bind();
+                    gl.vertexAttribPointer(al, count, gl.FLOAT, false, 0, 0);
+                    gl.enableVertexAttribArray(al);
+                }
             };
-
-            function bind(buffer) {
-                buffer.bind();
-                gl.vertexAttribPointer(al, count, gl.FLOAT, false, 0, 0);
-                gl.enableVertexAttribArray(al);
-            }
         }
 
         function uniform(type, name) {
             var ul = gl.getUniformLocation(pid, name);
-
             return {
-                set: set
+                set: function (v1, v2, v3, v4) {
+                    gl['uniform' + type](ul, v1, v2, v3, v4);
+                }
             };
-
-            function set(v1, v2, v3, v4) {
-                gl['uniform' + type](ul, v1, v2, v3, v4);
-            }
         }
 
         function shader(src, type) {
@@ -63,8 +57,13 @@ function GLx() {
             gl.shaderSource(sid, src);
             gl.compileShader(sid);
             var message = gl.getShaderInfoLog(sid);
-            if (message.length > 0) throw message;
             gl.attachShader(pid, sid);
+            if (message.length > 0) {
+                console.log(src.split('\n').map(function (str, i) {
+                    return ("" + (1 + i)).padStart(4, "0") + ": " + str
+                }).join('\n'));
+                throw message;
+            }
         }
     }
 
@@ -77,12 +76,10 @@ function GLx() {
         gl.bindBuffer(type, data = null);
 
         return {
-            bind: bind
+            bind: function () {
+                gl.bindBuffer(type, buffer);
+            }
         };
-
-        function bind() {
-            gl.bindBuffer(type, buffer);
-        }
     }
 
     function resize() {
