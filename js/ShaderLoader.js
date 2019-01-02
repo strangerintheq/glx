@@ -32,8 +32,9 @@ var ShaderLoader = (function () {
 
         function shaderPartLoader(row) {
             var loader = {src: null};
-            loadShaderSource(row.split(TAG).pop(), function(response) {
-                loader.src = response;
+            var url = row.split(TAG).pop();
+            loadShaderSource(url, function(response) {
+                loader.src = '\n//////\n// ' + url + '\n//////\n' + response + '\n//====';
                 loading.every(function (l) {
                     return l.src !== null;
                 }) && onReady(loading.map(function(loader) {

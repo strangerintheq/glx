@@ -1,19 +1,18 @@
-var Mouse3D = (function(){
+var OrbitControls = (function() {
 
     var theta = 0;
-    var phi = Math.PI/10;
+    var phi = Math.PI / 10;
     var mouse = {x: 0, y: 0};
     var dragStartMousePosition, dragStartPhi, dragStartTheta;
     var callback;
 
     var mouse3d = {
-        init: init,
 
         eye: [0, 0, 0],
-
         lookAt: [0, 0, 0],
-
         radius: 7,
+
+        init: init,
 
         callback: function (cb) {
             callback = cb;
@@ -79,4 +78,5 @@ var Mouse3D = (function(){
         updateCameraPosition();
         e.preventDefault()
     }
+
 })();

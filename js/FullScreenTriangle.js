@@ -6,11 +6,12 @@ function FullScreenTriangle(fragCode) {
 
     var vertices = glx.buffer([-1,  3, -1, -1, 3, -1]);
 
-    var vertCode =
-        `attribute vec2 coords;
-         void main(void) {
-           gl_Position = vec4(coords.xy, 0.0, 1.0);
-         }`;
+    var vertCode = `
+        attribute vec2 coords;
+        void main(void) {
+            gl_Position = vec4(coords.xy, 0.0, 1.0);
+        }
+    `;
 
     glx.triangleProgram = glx.program(vertCode, fragCode).use();
     glx.triangleProgram.attribute("coords", 2).bind(vertices);

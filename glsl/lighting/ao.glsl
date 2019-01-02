@@ -13,5 +13,5 @@ float ao( vec3 pos, vec3 nor, float power ) {
 }
 
 float ao(vec3 pos, vec3 nor) {
-    return ao(pos, nor, 0.9);
+    return ao(pos, nor, 0.91);
 }

@@ -23,7 +23,7 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha,
 }
 
 vec3 decodeMaterial(float m) {
-    return vec3(1.-m/3.);
+    return vec3(1.-sqrt(m)/2.);
 }
 
 vec3 phong(vec3 p, vec3 nor, vec3 eye, float material) {

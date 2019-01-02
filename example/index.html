@@ -15,22 +15,18 @@
 <script src="../js/glx.js"></script>
 <script src="../js/ShaderLoader.js"></script>
 <script src="../js/FullScreenTriangle.js"></script>
-<script src="../js/mouse3d.js"></script>
+<script src="../js/OrbitControls.js"></script>
 <script>
-
     ShaderLoader.load('fragment.glsl', init);
 
     function init(fragCode) {
-
         let fst = FullScreenTriangle(fragCode);
         let resolution = fst.triangleProgram.uniform('2f', 'resolution');
         let time = fst.triangleProgram.uniform('1f', 'time');
         let eye = fst.triangleProgram.uniform('3f', 'eye');
         let lightPos = fst.triangleProgram.uniform('3f', 'lightPos');
         let started = new Date().getTime();
-
-        Mouse3D.init();
-
+        OrbitControls.init();
         animate();
 
         function animate() {
@@ -42,13 +38,11 @@
             let t = (new Date().getTime() - started)/1000;
             resolution.set(fst.gl.drawingBufferWidth, fst.gl.drawingBufferHeight);
             time.set(t);
-            eye.set(Mouse3D.eye[0], Mouse3D.eye[1], Mouse3D.eye[2]);
+            eye.set(OrbitControls.eye[0], OrbitControls.eye[1], OrbitControls.eye[2]);
             lightPos.set(Math.cos(t/3)*0.8,0,Math.sin(t/3)*0.8);
             fst.draw();
         }
     }
-
 </script>
-
 </body>
 </html>

@@ -1,5 +1,10 @@
 precision highp float;
 
+// example of usage
+// glx library
+//
+// fragment shader
+
 uniform vec2 resolution;
 uniform vec3 eye;
 uniform vec3 lookAt;
@@ -22,7 +27,7 @@ void drawBg() {
 void drawScene(vec3 pt, float material) {
     vec3 nor = estimateNormal( pt );
     float occ = ao( pt, nor );
-    float shadow = softShadow( pt, normalize(lightPos-pt), 0.1, 22.2);
+    float shadow = softShadow( pt, normalize(lightPos-pt), 0.01, 2.2);
     vec3 color = phong(pt, nor, eye, material)*sqrt(occ);
     color += color * shadow;
     gl_FragColor = vec4(color, 1.0);
