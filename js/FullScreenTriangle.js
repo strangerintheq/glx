@@ -12,7 +12,7 @@ function FullScreenTriangle(fragCode) {
            gl_Position = vec4(coords.xy, 0.0, 1.0);
          }`;
 
-    glx.triangleProgram = glx.program(vertCode, 'precision highp float;' + fragCode).use();
+    glx.triangleProgram = glx.program(vertCode, fragCode).use();
     glx.triangleProgram.attribute("coords", 2).bind(vertices);
 
     glx.draw = function () {

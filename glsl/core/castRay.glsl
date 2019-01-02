@@ -1,9 +1,6 @@
-
-// raymarching
-
+// raymarching core
 // vec3 ro - ray origin
 // vec3 rd - ray direction
-
 vec2 castRay( vec3 ro, vec3 rd ) {
 
     float tmin = 1.0;

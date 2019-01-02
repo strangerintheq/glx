@@ -1,5 +1,4 @@
-
-
+// https://en.wikipedia.org/wiki/Fractional_Brownian_motion
 float fbm(vec3 x) {
 	float v = 0.0;
 	float a = 0.5;
