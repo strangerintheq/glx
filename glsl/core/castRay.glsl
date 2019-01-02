@@ -4,7 +4,7 @@
 vec2 castRay( vec3 ro, vec3 rd ) {
 
     float tmin = .1;
-    float tmax = 32.0;
+    float tmax = 64.0;
     float t = tmin;
     float m = -1.0;
 

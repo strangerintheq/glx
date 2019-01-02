@@ -12,8 +12,7 @@ uniform vec3 lightPos;
 uniform float time;
 
 #pragma import scene.glsl
-#pragma import ../glsl/core/rayDirection.glsl
-#pragma import ../glsl/core/viewMatrix.glsl
+#pragma import ../glsl/core/worldDir.glsl
 #pragma import ../glsl/core/castRay.glsl
 #pragma import ../glsl/lighting/normal.glsl
 #pragma import ../glsl/lighting/softShadow.glsl
@@ -34,13 +33,11 @@ void drawScene(vec3 pt, float material) {
 }
 
 void main(void) {
-	vec3 direction = rayDirection(60.0, resolution);
-    mat4 viewToWorld = viewMatrix(eye, lookAt, vec3(0.0, 1.0, 0.0));
-    vec3 worldDir = (viewToWorld * vec4(direction, 0.0)).xyz;
-    vec2 dist = castRay(eye, worldDir);
-    if (dist.x > 32.) {
+    vec3 rd = worldDir(60., resolution, eye, lookAt);
+    vec2 dist = castRay(eye, rd);
+    if (dist.x > 64.) {
         drawBg();
     } else {
-        drawScene(eye + dist.x * worldDir, dist.y);
+        drawScene(eye + dist.x * rd, dist.y);
     }
 }

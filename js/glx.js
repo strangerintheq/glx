@@ -47,7 +47,11 @@ function GLx() {
             var ul = gl.getUniformLocation(pid, name);
             return {
                 set: function (v1, v2, v3, v4) {
-                    gl['uniform' + type](ul, v1, v2, v3, v4);
+                    if (Array.isArray(v1)) {
+                        gl['uniform' + type](ul, v1[0], v1[1], v1[2], v1[3]);
+                    } else{
+                        gl['uniform' + type](ul, v1, v2, v3, v4);
+                    }
                 }
             };
         }
