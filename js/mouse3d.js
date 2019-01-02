@@ -1,15 +1,20 @@
 var Mouse3D = (function(){
 
     var theta = 0;
-    var phi = 0;
+    var phi = Math.PI/10;
     var mouse = {x: 0, y: 0};
-    var radius = 7;
     var dragStartMousePosition, dragStartPhi, dragStartTheta;
     var callback;
+
     var mouse3d = {
         init: init,
-        eye: [0, 0, radius],
+
+        eye: [0, 0, 0],
+
         lookAt: [0, 0, 0],
+
+        radius: 7,
+
         callback: function (cb) {
             callback = cb;
         }
@@ -17,12 +22,14 @@ var Mouse3D = (function(){
 
     return mouse3d;
 
-    function init(canvas) {
+    function init(canvas, radius) {
         var target = canvas || window;
         target.addEventListener('mousemove', mouseMove, false);
         target.addEventListener('mouseup', mouseUp, false);
         target.addEventListener('mousedown', mouseDown, false);
         target.addEventListener('mousewheel', mouseWheel, false);
+        mouse3d.radius = radius || mouse3d.radius;
+        updateCameraPosition();
     }
 
     function mouseMove(event) {
@@ -34,9 +41,10 @@ var Mouse3D = (function(){
     }
 
     function updateCameraPosition() {
-        mouse3d.eye[0] = mouse3d.lookAt[0] + radius * Math.cos(phi) * Math.sin(theta);
-        mouse3d.eye[1] = mouse3d.lookAt[1] + radius * Math.sin(phi);
-        mouse3d.eye[2] = mouse3d.lookAt[2] + radius * Math.cos(phi) * Math.cos(theta);
+        let m = mouse3d;
+        m.eye[0] = m.lookAt[0] + m.radius * Math.cos(phi) * Math.sin(theta);
+        m.eye[1] = m.lookAt[1] + m.radius * Math.sin(phi);
+        m.eye[2] = m.lookAt[2] + m.radius * Math.cos(phi) * Math.cos(theta);
         callback && callback();
     }
 
@@ -67,8 +75,8 @@ var Mouse3D = (function(){
     }
 
     function mouseWheel(e){
-        radius *= e.wheelDelta > 0 ? 0.9 : 1.1;
+        mouse3d.radius *= e.wheelDelta > 0 ? 0.9 : 1.1;
         updateCameraPosition();
-        e.stopPropagation();
+        e.preventDefault()
     }
 })();
