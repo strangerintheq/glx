@@ -15,7 +15,7 @@
 <script src="../js/glx.js"></script>
 <script src="../js/ShaderLoader.js"></script>
 <script src="../js/FullScreenTriangle.js"></script>
-<script src="../js/OrbitControls.js"></script>
+<script src="../js/FirstPersonControls.js"></script>
 <script>
     ShaderLoader.load('fragment.glsl', init);
 
@@ -27,7 +27,7 @@
         let eye = fst.triangleProgram.uniform('3f', 'eye');
         let lightPos = fst.triangleProgram.uniform('3f', 'lightPos');
         let started = new Date().getTime();
-        OrbitControls.init();
+        FirstPersonControls.init();
         animate();
 
         function animate() {
@@ -39,8 +39,8 @@
             let t = (new Date().getTime() - started)/1000;
             resolution.set(fst.gl.drawingBufferWidth, fst.gl.drawingBufferHeight);
             time.set(t);
-            eye.set(OrbitControls.eye);
-            lookAt.set(OrbitControls.lookAt);
+            eye.set(FirstPersonControls.eye);
+            lookAt.set(FirstPersonControls.forward);
             lightPos.set(Math.cos(t/3)*0.8,0,Math.sin(t/3)*0.8);
             fst.draw();
         }

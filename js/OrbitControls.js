@@ -7,13 +7,10 @@ var OrbitControls = (function() {
     var callback;
 
     var mouse3d = {
-
         eye: [0, 0, 0],
         lookAt: [0, 0, 0],
         radius: 7,
-
         init: init,
-
         callback: function (cb) {
             callback = cb;
         }
