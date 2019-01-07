@@ -1,35 +1,23 @@
 var FirstPersonControls = (function() {
 
     var maxSpeed = 1;
-    var theta = 0;
-    var phi = 0;
-    var mouse = {x: 0, y: 0};
-    var dragStartMousePosition, dragStartPhi, dragStartTheta, callback;
     var speed = directions();
     var moveDir = directions();
 
-    var mouse3d = {
-        eye: [0, 0, 0],
-        forward: [0, 0, 1],
-        right: [1, 0, 0],
-        init: init,
-        callback: function (cb) {
-            callback = cb;
-        }
-    };
-
+    var mouse3d = new Mouse3d();
+    mouse3d.forward = [0, 0, 1];
+    mouse3d.right = [1, 0, 0];
+    mouse3d.update(updatePositions);
+    mouse3d.init = init;
     return mouse3d;
 
     function init(canvas) {
         var target = canvas || window;
-        target.addEventListener('mousemove', mouseMove, false);
-        target.addEventListener('mouseup', mouseUp, false);
-        target.addEventListener('mousedown', mouseDown, false);
+        mouse3d.initListeners(target);
         target.addEventListener('keydown', keyListener(true), false);
         target.addEventListener('keyup', keyListener(false), false);
-        setInterval(update, 10)
+        setInterval(update, 10);
     }
-
 
     function upd(delta, dir, mag, i) {
         var k = 0.01;
@@ -87,51 +75,18 @@ var FirstPersonControls = (function() {
         }
     }
 
-    function mouseMove(event) {
-        if (event.target.tagName !== 'CANVAS') return;
-        mouse = event;
-        if (dragStartMousePosition) {
-            rotate();
-        }
-    }
-
     function updatePositions() {
         let m = mouse3d;
 
-        m.forward[0] = m.eye[0] + Math.cos(phi) * Math.sin(theta);
-        m.forward[1] = m.eye[1] - Math.sin(phi);
-        m.forward[2] = m.eye[2] + Math.cos(phi) * Math.cos(theta);
+        m.forward[0] = m.eye[0] + Math.cos(m.phi) * Math.sin(m.theta);
+        m.forward[1] = m.eye[1] - Math.sin(m.phi);
+        m.forward[2] = m.eye[2] + Math.cos(m.phi) * Math.cos(m.theta);
 
-        m.right[0] = m.eye[0] + Math.sin(theta + Math.PI/2);
+        m.right[0] = m.eye[0] + Math.sin(m.theta + Math.PI/2);
         m.right[1] = m.eye[1];
-        m.right[2] = m.eye[2] + Math.cos(theta + Math.PI/2);
-    }
+        m.right[2] = m.eye[2] + Math.cos(m.theta + Math.PI/2);
 
-    function rotate() {
-        var amountX = dragStartMousePosition ? dragStartMousePosition.x - mouse.x : 0;
-        var amountZ = mouse.y - dragStartMousePosition.y;
-        theta = dragStartTheta + amountX/360;
-        phi = dragStartPhi + amountZ/360;
-        var limit = Math.PI / 2;
-        phi = phi > limit ? limit : phi;
-        phi = phi < -limit ? -limit : phi;
-        updatePositions();
-        callback && callback();
-    }
-
-    function mouseDown(event) {
-        if (event.target.tagName !== 'CANVAS') return;
-        dragStartPhi = phi;
-        dragStartTheta = theta;
-        dragStartMousePosition = event;
-    }
-
-    function mouseUp() {
-        if (event.target.tagName !== 'CANVAS') return;
-        rotate();
-        dragStartMousePosition = null;
-        dragStartPhi = 0;
-        dragStartTheta = 0;
+        m.callback && m.callback();
     }
 
     function directions() {
