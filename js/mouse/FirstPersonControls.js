@@ -1,6 +1,6 @@
 var FirstPersonControls = (function() {
 
-    var maxSpeed = 1;
+    var maxSpeed = 100;
     var speed = directions();
     var moveDir = directions();
 

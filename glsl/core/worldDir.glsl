@@ -24,7 +24,7 @@ vec3 rayDirection(float fieldOfView, vec2 size) {
 }
 
 // calculate werld related view direction
-vec3 worldDir(float fov, vec2 reslution, vec3 eye, vec3 lookAt) {
+vec3 worldDir(float fov, vec2 resolution, vec3 eye, vec3 lookAt) {
 	vec3 direction = rayDirection(fov, resolution);
     mat4 viewToWorld = viewMatrix(eye, lookAt);
     return (viewToWorld * vec4(direction, 0.0)).xyz;
