@@ -4,70 +4,53 @@
 <link href="fullscreen.css" rel="stylesheet">
 <script src="../js/glx.js"></script>
 <script src="../js/ShaderLoader.js"></script>
-<script src="../js/FullScreenTriangle.js"></script>
 <script src="../js/mouse/Mouse3d.js"></script>
 <script src="../js/mouse/FirstPersonControls.js"></script>
 <script>
 
-    let gl = GLx();
-    gl.resize(512, 512);
+    FirstPersonControls.init();
 
-    let tex = gl.texture();
-    tex.resize(512, 512).framebuffer().bind();
+    let glx = GLx()
+        .shader('triangle', '../glsl/full-screen-triangle.glsl')
+        .shader('noise', 'noise.glsl')
+        .shader('main', 'main.glsl')
+        .onLoad(function () {
+            let l = glx.shaderLib;
+            l.triangle && l.main && l.noise && init();
+        });
 
-    let vs = `
-        attribute vec2 coords;
-        void main(void) {
-            gl_Position = vec4(coords.xy, 0.0, 1.0);
-        }
-    `;
+    document.body.appendChild(glx.canvas);
 
-    let renderToTextureProgram = gl.program(vs, `
+    function init() {
 
-    `);
+        let gl = glx.ctx;
+        let vertices = glx.buffer(glx.meshes.FULL_SCREEN_TRIANGLE);
+        let tex = glx.texture();
+        tex.bind().resize(512, 512).framebuffer().bind();
+        glx.program('triangle', 'noise').use()
+            .attribute("coords", 2).bind(vertices);
+        glx.resize(512, 512).draw(3);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    renderToTextureProgram.use();
-
-    draw(512, 512);
-
-
-    ShaderLoader.load('terrain.glsl', init);
-
-
-    function init(fragCode) {
-
-        let mainProgram = gl.program(vs, fragCode);
-
+        let mainProgram = glx.program('triangle', 'main').use()
+            .attribute("coords", 2).bind(vertices);
         let resolution = mainProgram.uniform('2f', 'resolution');
-        let time = mainProgram.uniform('1f', 'time');
         let lookAt = mainProgram.uniform('3f', 'lookAt');
         let eye = mainProgram.uniform('3f', 'eye');
-        let lightPos = mainProgram.uniform('3f', 'lightPos');
-        let started = new Date().getTime();
-        FirstPersonControls.init();
+        //let noise = mainProgram.uniform('1i', 'noiseTexture');
+        //  gl.activeTexture(gl.TEXTURE0);
+        //  tex.bind();
+        //  noise.set(0);
 
         animate();
 
         function animate() {
             requestAnimationFrame(animate);
-            drawFrame();
-        }
-
-        function drawFrame() {
-            let t = (new Date().getTime() - started)/1000;
             resolution.set(gl.drawingBufferWidth, gl.drawingBufferHeight);
-            time.set(t);
             eye.set(FirstPersonControls.eye);
             lookAt.set(FirstPersonControls.forward);
-            lightPos.set(Math.cos(t/3)*0.8,0,Math.sin(t/3)*0.8);
-            draw(gl.drawingBufferWidth, gl.drawingBufferHeight);
+            glx.resize().draw(3);
         }
-    }
-
-    function draw(w, h) {
-        gl.viewport(0, 0, w, h);
-        gl.clearColor(0, 0, 0, 1);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 </script>
 </body>

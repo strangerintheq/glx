@@ -28,11 +28,12 @@
 
         function drawFrame() {
             let t = (new Date().getTime() - started)/1000;
-            resolution.set(fst.gl.drawingBufferWidth, fst.gl.drawingBufferHeight);
+            resolution.set(fst.ctx.drawingBufferWidth, fst.ctx.drawingBufferHeight);
             time.set(t);
             eye.set(OrbitControls.eye);
             lookAt.set(OrbitControls.lookAt);
             lightPos.set(Math.cos(t/3)*0.8,0,Math.sin(t/3)*0.8);
+            fst.resize();
             fst.draw();
         }
     }
