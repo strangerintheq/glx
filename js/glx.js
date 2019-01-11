@@ -10,7 +10,8 @@ function GLx() {
         gl: gl,
         buffer: buffer,
         program: program,
-        resize: resize
+        resize: resize,
+        texture: texture
     };
 
     function program(vs, fs) {
@@ -84,6 +85,37 @@ function GLx() {
                 gl.bindBuffer(type, buffer);
             }
         };
+    }
+
+    function texture(mipmap) {
+        var tex = gl.createTexture();
+        mipmap = mipmap || 0;
+        var fbo;
+        let t = {
+            bind: function () {
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+            },
+            framebuffer: function() {
+                if (!fbo) {
+                    fbo = {
+                        fbo: gl.createFramebuffer(),
+                        bind: function () {
+                            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.fbo);
+                            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, mipmap);
+                        }
+                    }
+                }
+                return fbo;
+            },
+            resize: function (width, height) {
+                gl.texImage2D(gl.TEXTURE_2D, mipmap, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                return t;
+            }
+        };
+        return t
     }
 
     function resize() {

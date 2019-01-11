@@ -8,17 +8,44 @@
 <script src="../js/mouse/Mouse3d.js"></script>
 <script src="../js/mouse/FirstPersonControls.js"></script>
 <script>
+
+    let gl = GLx();
+    gl.resize(512, 512);
+
+    let tex = gl.texture();
+    tex.resize(512, 512).framebuffer().bind();
+
+    let vs = `
+        attribute vec2 coords;
+        void main(void) {
+            gl_Position = vec4(coords.xy, 0.0, 1.0);
+        }
+    `;
+
+    let renderToTextureProgram = gl.program(vs, `
+
+    `);
+
+    renderToTextureProgram.use();
+
+    draw(512, 512);
+
+
     ShaderLoader.load('terrain.glsl', init);
 
+
     function init(fragCode) {
-        let fst = FullScreenTriangle(fragCode);
-        let resolution = fst.triangleProgram.uniform('2f', 'resolution');
-        let time = fst.triangleProgram.uniform('1f', 'time');
-        let lookAt = fst.triangleProgram.uniform('3f', 'lookAt');
-        let eye = fst.triangleProgram.uniform('3f', 'eye');
-        let lightPos = fst.triangleProgram.uniform('3f', 'lightPos');
+
+        let mainProgram = gl.program(vs, fragCode);
+
+        let resolution = mainProgram.uniform('2f', 'resolution');
+        let time = mainProgram.uniform('1f', 'time');
+        let lookAt = mainProgram.uniform('3f', 'lookAt');
+        let eye = mainProgram.uniform('3f', 'eye');
+        let lightPos = mainProgram.uniform('3f', 'lightPos');
         let started = new Date().getTime();
         FirstPersonControls.init();
+
         animate();
 
         function animate() {
@@ -28,13 +55,19 @@
 
         function drawFrame() {
             let t = (new Date().getTime() - started)/1000;
-            resolution.set(fst.gl.drawingBufferWidth, fst.gl.drawingBufferHeight);
+            resolution.set(gl.drawingBufferWidth, gl.drawingBufferHeight);
             time.set(t);
             eye.set(FirstPersonControls.eye);
             lookAt.set(FirstPersonControls.forward);
             lightPos.set(Math.cos(t/3)*0.8,0,Math.sin(t/3)*0.8);
-            fst.draw();
+            draw(gl.drawingBufferWidth, gl.drawingBufferHeight);
         }
+    }
+
+    function draw(w, h) {
+        gl.viewport(0, 0, w, h);
+        gl.clearColor(0, 0, 0, 1);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 </script>
 </body>
