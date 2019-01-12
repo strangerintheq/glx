@@ -1,0 +1,23 @@
+{
+  "name": "glx",
+  "version": "0.0.5",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strangerintheq/glx.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/strangerintheq/glx/issues"
+  },
+  "homepage": "https://github.com/strangerintheq/glx#readme"
+}

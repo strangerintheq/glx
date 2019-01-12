@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<body>
+<link href="fullscreen.css" rel="stylesheet">
+<script src="../js/glx.js"></script>
+<script src="../js/mouse/Mouse3d.js"></script>
+<script src="../js/mouse/FirstPersonControls.js"></script>
+<script>
+
+    FirstPersonControls.init();
+
+    let glx = GLx();
+
+    glx.shader('triangle', '../glsl/full-screen-triangle.glsl')
+        .shader('noise1', 'noise1.glsl')
+        .shader('noise2', 'noise2.glsl')
+        .shader('main', 'test.glsl')
+        .shadersLoadCallback = init;
+
+    document.body.appendChild(glx.canvas);
+
+    function init() {
+
+        let gl = glx.ctx;
+        let fullScreenTriangle = glx.buffer(glx.meshes.FULL_SCREEN_TRIANGLE);
+
+        let tex1 = noiseTexture('noise1');
+        let tex2 = noiseTexture('noise2');
+
+        let mainProgram = glx.program('triangle', 'main').use()
+            .attribute("coords", 2).bind(fullScreenTriangle);
+
+        let resolution = mainProgram.uniform('2f', 'resolution');
+        let lookAt = mainProgram.uniform('3f', 'lookAt');
+        let lightPos = mainProgram.uniform('3f', 'lightPos');
+        let eye = mainProgram.uniform('3f', 'eye');
+
+        let noise1 = mainProgram.uniform('1i', 'noiseTexture1');
+        tex1.set(noise1, 0);
+
+        let noise2 = mainProgram.uniform('1i', 'noiseTexture2');
+        tex2.set(noise2, 1);
+
+        animate();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            let t = glx.time();
+
+            glx.resize();
+            resolution.set(gl.drawingBufferWidth, gl.drawingBufferHeight);
+            eye.set(FirstPersonControls.eye);
+            lookAt.set(FirstPersonControls.forward);
+            lightPos.set(Math.cos(t/3)*0.8,0,Math.sin(t/3)*0.8);
+
+            glx.draw(3);
+        }
+
+        function noiseTexture(shader) {
+            glx.program('triangle', shader).use()
+                .attribute("coords", 2)
+                .bind(fullScreenTriangle);
+            let tex = glx.texture();
+            tex.renderTo(512, 512, 3);
+            return tex;
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,11 +1,8 @@
 // raymarching core
 // vec3 ro - ray origin
 // vec3 rd - ray direction
-vec2 castRay( vec3 ro, vec3 rd ) {
+vec2 castRay( vec3 ro, vec3 rd, float tmin, float tmax, float t ) {
 
-    float tmin = .1;
-    float tmax = 64.0;
-    float t = tmin;
     float m = -1.0;
 
     for ( int i=0; i<64; i++ ) {
@@ -14,7 +11,7 @@ vec2 castRay( vec3 ro, vec3 rd ) {
         if ( res.x<precis || t>tmax ) {
             break;
         }
-        t += res.x;
+        t += res.x*0.5;
 	    m = res.y;
     }
 

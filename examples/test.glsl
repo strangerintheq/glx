@@ -1,15 +1,11 @@
 precision highp float;
 
-// example of usage
-// glx library
-//
-// fragment shader
-
 uniform vec2 resolution;
 uniform vec3 eye;
 uniform vec3 lookAt;
 uniform vec3 lightPos;
-uniform float time;
+uniform sampler2D noise1;
+uniform sampler2D noise2;
 
 #pragma import scene.glsl
 #pragma import ../glsl/core/worldDir.glsl
@@ -20,7 +16,11 @@ uniform float time;
 #pragma import phong.glsl
 
 void drawBg() {
-    gl_FragColor = vec4(0.9, 0.9, 0.9, 1.0);
+    vec2 uv = gl_FragCoord.xy/1000.;
+    gl_FragColor = vec4(
+        texture2D(noise1, uv).g,
+        texture2D(noise2, uv).r,
+        0., 1.);
 }
 
 void drawScene(vec3 pt, float material) {

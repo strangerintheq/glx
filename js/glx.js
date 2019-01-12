@@ -1,44 +1,57 @@
 // tiny webgl lib
-
 function GLx(params) {
-    var glx = init(params);
+    let started = new Date().getTime();
+    var glx = params || {};
+    glx.canvas = glx.canvas || document.createElement('canvas');
+    glx.ctx = glx.ctx || glx.canvas.getContext('webgl') || glx.canvas.getContext('experimental-webgl');
     var canvas = glx.canvas;
     var gl = glx.ctx;
     glx.buffer = buffer;
     glx.program = program;
-    glx.resize = resize;
     glx.texture = texture;
     glx.buffer = buffer;
-    glx.draw = draw;
     glx.shader = loadShaderCode;
-    glx.onLoad = onLoad;
+
+    glx.resize =  function (w, h) {
+        w = w || canvas.clientWidth;
+        h = h || canvas.clientHeight;
+        canvas.width = canvas.width !== w ? w : canvas.width;
+        canvas.height = canvas.height !== h ? h : canvas.height;
+        return glx;
+    };
+
+    glx.draw = function (vertexCount) {
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        gl.clearColor(0, 0, 0, 1);
+        gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+    };
+
+    glx.time = function() {
+        return (new Date().getTime() - started) / 1000;
+    };
+
     glx.meshes = {
         FULL_SCREEN_TRIANGLE: [-1,  3, -1, -1, 3, -1]
     };
+
     return glx;
-
-    function onLoad(func) {
-        glx.shadersLoadCallback = func;
-        return glx;
-    }
-
-    function init(params) {
-        params = params || {};
-        params.canvas = params.canvas || document.createElement('canvas');
-        params.ctx = params.ctx || params.canvas.getContext('webgl') || params.canvas.getContext('experimental-webgl');
-        return params;
-    }
 
     function loadShaderCode(name, url, onLoad) {
         glx.shaderLib = glx.shaderLib || {};
         if (glx.shaderLib[name]) {
             onLoad && onLoad(glx.shaderLib[name]);
         } else {
+            glx.shaderLib[name] = null;
             req(url, function (response) {
                 glueShader(response, function (code) {
                     glx.shaderLib[name] = code;
                     onLoad && onLoad(code);
-                    glx.shadersLoadCallback && glx.shadersLoadCallback();
+                    if (Object.keys(glx.shaderLib).every(function (key) {
+                        return glx.shaderLib[key];
+                    }) && glx.shadersLoadCallback ) {
+                        glx.shadersLoadCallback();
+                        glx.shadersLoadCallback = null;
+                    }
                 });
             });
         }
@@ -76,14 +89,9 @@ function GLx(params) {
         }
     }
 
-    function draw(vertexCount) {
-        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        gl.clearColor(0, 0, 0, 1);
-        gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
-    }
-
     function program(vs, fs) {
         var pid = gl.createProgram(); // program id
+        pid.fs = fs;
         shader(glx.shaderLib[vs], gl.VERTEX_SHADER);
         shader(glx.shaderLib[fs], gl.FRAGMENT_SHADER);
         gl.linkProgram(pid);
@@ -155,44 +163,25 @@ function GLx(params) {
 
     function texture(mipmap) {
         var tex = gl.createTexture();
-        mipmap = mipmap || 0;
-        var fbo;
-        let t = {
-            tex: tex,
-            bind: function () {
+        return {
+            set: function (uniformLocation, index) {
+                gl.activeTexture(gl.TEXTURE0 + index);
                 gl.bindTexture(gl.TEXTURE_2D, tex);
-                return t;
+                uniformLocation.set(index);
             },
-            framebuffer: function() {
-                if (!fbo) fbo = {
-                    fbo: gl.createFramebuffer(),
-                    bind: function () {
-                        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.fbo);
-                        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, mipmap);
-                    }
-                };
-                return fbo;
-            },
-            resize: function (width, height) {
-                gl.texImage2D(gl.TEXTURE_2D, mipmap, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-                return t;
+            renderTo: function(width, height, vertexCount) {
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.texImage2D(gl.TEXTURE_2D, mipmap || 0, gl.RGBA, width, height,
+                    0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, gl.createFramebuffer());
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D,
+                    tex, mipmap || 0);
+                glx.resize(width, height).draw(vertexCount);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             }
         };
-        return t;
-    }
-
-    function resize(w, h) {
-        var c = canvas;
-        if (w && h && (c.width !== w || c.height !== h)) {
-            c.width = w;
-            c.height = h;
-        } else if (c.clientWidth !== c.width || c.clientHeight !== c.height) {
-            c.width = c.clientWidth;
-            c.height = c.clientHeight;
-        }
-        return glx;
     }
 }
